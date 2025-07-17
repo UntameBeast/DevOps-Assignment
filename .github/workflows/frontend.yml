@@ -1,0 +1,44 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches:
+      - feature/frontend
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  build-deploy-frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          yarn install || npm install
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          yarn build || npm run build
+
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build & Push Docker Image
+        env:
+          ECR_REPO: ${{ secrets.ECR_FRONTEND_REPO }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          cd frontend
+          docker build -t $ECR_REPO:latest .
+          docker push $ECR_REPO:latest
