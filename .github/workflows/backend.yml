@@ -1,4 +1,4 @@
-name: Backend CI/CD
+name: Backend CI
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - develop
 
 jobs:
-  build-deploy-backend:
+  build-backend:
     runs-on: ubuntu-latest
 
     steps:
@@ -33,14 +33,7 @@ jobs:
           cd backend
           pytest || echo "No tests found"
 
-      - name: Log in to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Build & Push Docker Image
-        env:
-          ECR_REPO: ${{ secrets.ECR_BACKEND_REPO }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+      - name: Test Docker build (optional)
         run: |
           cd backend
-          docker build -t $ECR_REPO:latest .
-          docker push $ECR_REPO:latest
+          docker build -t backend-test:latest .
