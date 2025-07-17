@@ -1,4 +1,4 @@
-name: Frontend CI/CD
+name: Frontend CI
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - develop
 
 jobs:
-  build-deploy-frontend:
+  build-frontend:
     runs-on: ubuntu-latest
 
     steps:
@@ -31,14 +31,7 @@ jobs:
           cd frontend
           yarn build || npm run build
 
-      - name: Log in to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Build & Push Docker Image
-        env:
-          ECR_REPO: ${{ secrets.ECR_FRONTEND_REPO }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+      - name: Test Docker build (optional)
         run: |
           cd frontend
-          docker build -t $ECR_REPO:latest .
-          docker push $ECR_REPO:latest
+          docker build -t frontend-test:latest .
