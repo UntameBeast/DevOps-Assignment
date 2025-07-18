@@ -1,28 +1,40 @@
-name: Terraform CI
+name: Terraform Deploy
 
 on:
   push:
-    branches:
-      - develop
-      - feature/**
+    branches: [main]
 
 jobs:
-  terraform-check:
+  terraform:
+    name: Terraform Apply
     runs-on: ubuntu-latest
 
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: us-east-1
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.5.0
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.5.0
 
-      - name: Terraform Format, Init (no backend), Validate, Plan
-        working-directory: terraform
-        run: |
-          terraform fmt -check
-          terraform init -backend=false
-          terraform validate
-          terraform plan -input=false 
+    - name: Terraform Init
+      run: terraform init
+      working-directory: ./terraform
+
+    - name: Terraform Format Check
+      run: terraform fmt -check
+      working-directory: ./terraform
+
+    - name: Terraform Plan
+      run: terraform plan -out=tfplan
+      working-directory: ./terraform
+
+    - name: Terraform Apply
+      run: terraform apply -auto-approve tfplan
+      working-directory: ./terraform
