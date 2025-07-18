@@ -19,9 +19,9 @@ jobs:
         with:
           terraform_version: 1.5.0
 
-      - name: Terraform Format, Init, Validate, Plan (CI only)
+      - name: Terraform Format, Init (no backend), Validate, Plan
+        working-directory: terraform
         run: |
-          cd terraform
           terraform fmt -check
           terraform init -backend=false
           terraform validate
