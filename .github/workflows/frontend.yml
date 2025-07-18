@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - feature/frontend
+      - develop
   pull_request:
     branches:
       - develop
+      - main
 
 jobs:
   build-frontend:
