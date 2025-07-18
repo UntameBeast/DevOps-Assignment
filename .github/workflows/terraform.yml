@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - feature/terraform
+      - develop
   pull_request:
     branches:
       - develop
+      - main
 
 jobs:
   terraform-check:
