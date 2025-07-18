@@ -35,5 +35,5 @@ jobs:
       - name: Terraform Plan
         run: |
           cd terraform
-          terraform plan
+          terraform plan -input=false -no-color
       
