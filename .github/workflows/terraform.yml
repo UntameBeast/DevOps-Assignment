@@ -25,4 +25,4 @@ jobs:
           terraform fmt -check
           terraform init -backend=false
           terraform validate
-          terraform plan -input=false -no-color
+          terraform plan -input=false 
