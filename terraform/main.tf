@@ -28,7 +28,7 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-# VPC (Optional: Use default or create your own)
+# VPC (Default)
 data "aws_vpc" "default" {
   default = true
 }
@@ -40,12 +40,33 @@ data "aws_subnets" "default" {
   }
 }
 
-# Application Load Balancer
+# ✅ Security Group for ALB
+resource "aws_security_group" "alb_sg" {
+  name        = "alb-sg"
+  description = "Allow HTTP access to ALB"
+  vpc_id      = data.aws_vpc.default.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# Application Load Balancer with security group attached
 resource "aws_lb" "app_alb" {
   name               = "app-alb"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = []
+  security_groups    = [aws_security_group.alb_sg.id] # ✅ Fix applied here
   subnets            = data.aws_subnets.default.ids
 }
 
