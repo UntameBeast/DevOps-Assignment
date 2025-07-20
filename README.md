@@ -1,126 +1,129 @@
-# DevOps Assignment
+## 🚀 DevOps Assignment: Two-Tier Web App (FastAPI + Next.js)
 
-This project consists of a FastAPI backend and a Next.js frontend that communicates with the backend.
+This project demonstrates end-to-end DevOps skills including containerization, CI/CD, infrastructure as code with Terraform, monitoring, security, and load balancing using AWS.
+
 
 ## Project Structure
 .
 ```
 .
-├── backend/               # FastAPI backend
-│   ├── app/
-│   │   └── main.py       # Main FastAPI application
-│   └── requirements.txt    # Python dependencies
-└── frontend/              # Next.js frontend
-    ├── pages/
-    │   └── index.js     # Main page
-    ├── public/            # Static files
-    └── package.json       # Node.js dependencies
+Devops-Assignment/
+│
+├── README.md
+├── backend/
+│   ├── app/                  # FastAPI code
+│   ├── tests/                # Pytest unit tests
+│   ├── Dockerfile            # DockerFile
+│   └── requirements.txt
+│
+├── frontend/
+│   ├── pages/                # Next.js pages
+│   ├── tests/                # Cypress or Jest tests
+│   ├── Dockerfile            # DockerFile
+│   └── package.json
+│
+├── .github/
+│   └── workflows/
+│       ├── backend.yml       # CI/CD for backend
+│       ├── frontend.yml
+│       └── terraform.yml
+│
+├── terraform/
+│   ├── main.tf
+│   ├── variables.tf
+│   ├── outputs.tf
+│   └── backend.tf
+
 ```
 
-## Prerequisites
+## Branching Strategy
+##  Github Flow Branching Strategy
 
-- Python 3.8+
-- Node.js 16+
-- npm or yarn
+- `main` – Stable, production-ready code.
+- `develop` – Integrated feature branches.
+- `feature/*` – One branch per feature (e.g. `feature/backend`, `feature/frontend`, `feature/terraform`)
+- PRs reviewed before merging to develop, then merged into main for deployment.
+---------------------
 
-## Backend Setup
+## Setup Instructions
+### Prerequisites
+- Docker
+- AWS CLI
+- Terraform
+- Python & Node.js installed
 
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
+### Steps
+1. Clone the repo
+2. Navigate to `backend/` and run: `uvicorn app.main:app --reload`
+3. Navigate to `frontend/` and run: `npm run dev`
+4. Run tests using:
+   - Backend: `pytest`
+   - Frontend: `npx cypress open`
+5. Build Docker images and push to ECR (automated in CI/CD)
+--------------------
 
-2. Create a virtual environment (recommended):
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: .\venv\Scripts\activate
-   ```
+## CI/CD Pipeline
 
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+CI (On develop branch push):
 
-4. Run the FastAPI server:
-   ```bash
-   uvicorn app.main:app --reload --port 8000
-   ```
+- Checkout code
 
-   The backend will be available at `http://localhost:8000`
+- Run backend unit tests (Pytest)
 
-## Frontend Setup
+- Run frontend E2E tests (Cypress)
 
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
+- Build Docker images (backend & frontend)
 
-2. Install dependencies:
-   ```bash
-   npm install
-   # or
-   yarn
-   ```
+- Tag images with Git SHA
 
-3. Configure the backend URL (if different from default):
-   - Open `.env.local`
-   - Update `NEXT_PUBLIC_API_URL` with your backend URL
-   - Example: `NEXT_PUBLIC_API_URL=https://your-backend-url.com`
+- Push Docker images to AWS ECR (currently failing — WIP to resolve issue)
 
-4. Run the development server:
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
+CD (On main merge):
 
-   The frontend will be available at `http://localhost:3000`
+- Terraform applies infra (ECS, ALB, S3 backend, Cloudwatch)
 
-## Changing the Backend URL
+- Deploy containers to ECS
+----------------------
 
-To change the backend URL that the frontend connects to:
+## Infrastructure (Terraform)
 
-1. Open the `.env.local` file in the frontend directory
-2. Update the `NEXT_PUBLIC_API_URL` variable with your new backend URL
-3. Save the file
-4. Restart the Next.js development server for changes to take effect
+Provisioned AWS resources:
+- VPC, Subnets, Internet Gateway
+- ECS Cluster (Fargate) for frontend & backend
+- Application Load Balancer
+- S3 Bucket for storing Terraform state
+- CloudWatch Dashboard + CPU Alarm
+- IAM roles with least privilege
+- Secrets in AWS Secrets Manager
+------------------------
+## 📊 Monitoring
 
-Example:
-```
-NEXT_PUBLIC_API_URL=https://your-new-backend-url.com
-```
+- AWS CloudWatch dashboard shows CPU, memory, and request count.
+- Alarm notifies when CPU > 70% for 5 minutes.
+---------------------
+## Load Balancing
 
-## For deployment:
-   ```bash
-   npm run build
-   # or
-   yarn build
-   ```
+- Application Load Balancer created
 
-   AND
+- ECS service configured (although app image isn't deployed yet due to ECR push failure)
 
-   ```bash
-   npm run start
-   # or
-   yarn start
-   ```
+- Failover test pending successful deployment
+----------------------
+## Deliverables
 
-   The frontend will be available at `http://localhost:3000`
+- GitHub Repo: https://github.com/UntameBeast/DevOps-Assignment.git 
 
-## Testing the Integration
+- Hosted Link (frontend/backend): Pending ECR push fix
 
-1. Ensure both backend and frontend servers are running
-2. Open the frontend in your browser (default: http://localhost:3000)
-3. If everything is working correctly, you should see:
-   - A status message indicating the backend is connected
-   - The message from the backend: "You've successfully integrated the backend!"
-   - The current backend URL being used
+Hands-on Evidence:
 
-## API Endpoints
+- Terraform state in S3 ✅
 
-- `GET /api/health`: Health check endpoint
-  - Returns: `{"status": "healthy", "message": "Backend is running successfully"}`
+- CloudWatch dashboard & alarms ✅
 
-- `GET /api/message`: Get the integration message
-  - Returns: `{"message": "You've successfully integrated the backend!"}` .
-  - 
+- IAM & Secrets configuration ✅
+
+- ECR logs showing failed push ❌ (debugging)
+
+- ALB setup exists; load test to follow
+------------------------------------------------------
